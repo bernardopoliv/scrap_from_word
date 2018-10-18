@@ -4,31 +4,23 @@ import docx
 import openpyxl
 
 os.chdir('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD')
-doc = docx.Document('Residential_Lease_Template_FL22.docx')
+
+doc = docx.Document('Commercial_Lease_Template_FL22.docx')
 
 fields_and_values = {}
 
 def lookup(paragraph_index: int, runs_index: int, variable_name: str):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
-    fields_and_values.update(
-        {
-            f'{variable_name}': value
-        }
-    )
+    fields_and_values.update({f'{variable_name}': value})
     return value
 
 def get_allparagraph(paragraph_index: int, variable_name: str):
     value = doc.paragraphs[paragraph_index].text
-    fields_and_values.update(
-        {
-            f'{variable_name}': value
-        }
-    )
+    fields_and_values.update({f'{variable_name}': value})
     return value
 
 def look_value(paragraph_index: int, runs_index: int):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
-
     return value
 
 template_wb = openpyxl.load_workbook('template.xlsx')
@@ -51,7 +43,6 @@ def export():
         column += 1
         first_value_row = 2
     template_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\output.xlsx')
-
 
 
 def scan():
@@ -172,7 +163,7 @@ def AG_RESIDENTIAL():
     lookup(15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_SIGNED: YES/NO')
     lookup(15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_NOTARY_SIGNED: YES/NO')
 
-def AG_PERMIT():
+def AGRICUTURAL_PERMIT():
     fields_and_values = {}
 
     AG_PERMIT_TYPE = doc.paragraphs[1].text
