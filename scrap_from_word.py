@@ -3,7 +3,7 @@ import os
 import docx
 import openpyxl
 
-os.chdir('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD')
+# os.chdir('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD')
 
 doc = docx.Document('Commercial_Lease_Template_FL22.docx')
 
@@ -27,22 +27,14 @@ template_wb = openpyxl.load_workbook('template.xlsx')
 template_sheet = template_wb['Sheet1']
 
 def export():
-    first_value_row = 2
+    import pdb; pdb.set_trace()
     column = 1
-    for key in fields_and_values.keys():
+    for key, value in fields_and_values.items():
         template_sheet.cell(row=1, column=column).value = key
-        column +=1
-        # for value in fields_and_values.values():
-        #     try:
-        #         for new_value in fields_and_values['f{key}']:
-        #             if value == new_value:
-        #                 template_sheet.cell(row=first_value_row, column=column).value = value
-        #                 first_value_row += 1
-        #     except:
-        #         pass
+        template_sheet.cell(row=2, column=column).value = value
         column += 1
-        first_value_row = 2
-    template_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\output.xlsx')
+
+    template_wb.save('output.xlsx')
 
 
 def scan():
