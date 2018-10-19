@@ -4,11 +4,37 @@ import docx
 import openpyxl
 
 
-# input_path = 'C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD'
-
-# os.chdir(input_path)
-
 fields_and_values = {}
+
+
+def lookup(doc, fields_and_values, paragraph_index: int, runs_index: int, variable_name: str):
+    value = doc.paragraphs[paragraph_index].runs[runs_index].text
+    fields_and_values.update({variable_name: value})
+    return value
+
+def get_allparagraph(doc, fields_and_values, paragraph_index: int, variable_name: str):
+    value = doc.paragraphs[paragraph_index].text
+    fields_and_values.update({variable_name: value})
+    return value
+
+def look_value(doc, paragraph_index: int, runs_index: int):
+    value = doc.paragraphs[paragraph_index].runs[runs_index].text
+    return value
+
+def export(fields_and_values, output_file = None):
+    output_wb = openpyxl.Workbook()
+    output_sheet = output_wb.active
+
+    column = 1
+    for key, value in fields_and_values.items():
+        output_sheet.cell(row=1, column=column).value = key
+        output_sheet.cell(row=2, column=column).value = value
+        column += 1
+
+    if output_file:
+        output_wb.save(output_file)
+    else:
+        output_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx')
 
 def scan():
     i=0
@@ -201,32 +227,6 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
 
         return fields_and_values
 
-def lookup(doc, fields_and_values, paragraph_index: int, runs_index: int, variable_name: str):
-    value = doc.paragraphs[paragraph_index].runs[runs_index].text
-    fields_and_values.update({variable_name: value})
-    return value
 
-def get_allparagraph(doc, fields_and_values, paragraph_index: int, variable_name: str):
-    value = doc.paragraphs[paragraph_index].text
-    fields_and_values.update({variable_name: value})
-    return value
 
-def look_value(doc, paragraph_index: int, runs_index: int):
-    value = doc.paragraphs[paragraph_index].runs[runs_index].text
-    return value
 
-def export(fields_and_values, output_file = None):
-    output_wb = openpyxl.Workbook()
-    output_sheet = output_wb.active
-
-    column = 1
-    for key, value in fields_and_values.items():
-        output_sheet.cell(row=1, column=column).value = key
-        output_sheet.cell(row=2, column=column).value = value
-        column += 1
-
-    import pdb; pdb.set_trace()
-    if output_file:
-        output_wb.save(output_file)
-    else:
-        output_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx')
