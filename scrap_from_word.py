@@ -3,31 +3,13 @@ import os
 import docx
 import openpyxl
 
-input_path = 'C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD'
-
-os.chdir(input_path)
-
-doc = docx.Document()
 fields_and_values = {}
 
-def scan():
-    i=0
-    for p in doc.paragraphs:
-         print(i, p.text)
-         i+=1
+def get_values(document_type: str, doc:docx.Document):
 
-def find_value(paragraph_index: int):
-    for p in range (0,100):
-        try:
-            print(str(p) + doc.paragraphs[paragraph_index].runs[p].text)
-        except:
-            pass
+   if document_type == 'CO':
 
-def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or 'RE'
-
-    fields_and_values = {}
-    if document_type == 'CO':
-
+        fields_and_values = {}
         # COMMERCIAL TEMPLATE
         #PAGE 1
         lookup(0,0,'PERMIT_TYPE')
@@ -82,7 +64,7 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
 
         export()
 
-    elif document_type == 'RE':
+   elif document_type == 'RE':
 
         #RESIDENTIAL TEMPLATE
         fields_and_values = {}
@@ -127,12 +109,10 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         lookup(15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_NOTARY_SIGNED: YES/NO')
         export()
 
-    elif document_type == 'AG':
+   elif document_type == 'AG':
 
         #AGRICUTURAL TEMPLATE
         fields_and_values = {}
-
-        doc = docx.Document('Agricultural Crop Share Permit Template FL22.docx')
 
         AG_PERMIT_TYPE = doc.paragraphs[1].text
         AG_PERMIT_TYPE = AG_PERMIT_TYPE[1:]
@@ -226,3 +206,16 @@ def export():
         output_sheet.cell(row=2, column=column).value = value
         column += 1
     output_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx')
+
+def scan():
+    i = 0
+    for p in doc.paragraphs:
+        print(i, p.text)
+        i += 1
+
+def find_value(paragraph_index: int):
+    for p in range(0, 100):
+        try:
+            print(str(p) + doc.paragraphs[paragraph_index].runs[p].text)
+        except:
+            pass
