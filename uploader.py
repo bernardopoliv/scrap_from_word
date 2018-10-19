@@ -1,42 +1,56 @@
 import os
-from flask import Flask, flash, request, redirect, url_for
+import io
 
+import docx
+from flask import Flask, flash, request, redirect, url_for, send_file
+
+from scrap_from_word import (
+    get_values,
+    export
+)
 # http://flask.pocoo.org/docs/1.0/patterns/fileuploads/
 
 # UPLOAD_FOLDER = '/path/to/the/uploads'
 ALLOWED_EXTENSIONS = set(['docx', 'doc'])
 
 app = Flask(__name__)
-# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = b'_5#andwqehas,mdnewr2738rhksdjffdy2L"F4Q8z\n\xec]/'
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
+        if not request.form.get('doc_type', '') in ('AG', 'RE', 'CO'):
+            return 'You need to specify a document type.'
+        doc_type = request.form['doc_type']
 
-        # check if the post request has the file part
+        # check if the post request has the file key
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            return 'File not selected.'
 
         file = request.files['file']
 
-        # if user does not select file, browser also
-        # submit an empty part without filename
         if file.filename == '':
-            flash('No selected file.')
-            return redirect(request.url)
+            return 'File not selected.'
 
         if file and allowed_file(file.filename):
-            return file.read()
+            doc = docx.Document(file)
 
-            # filename = secure_filename(file.filename)
-            # file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            # return redirect(url_for('uploaded_file',
-                                    # filename=filename))
+            data = get_values(doc_type, doc)
+            xlsx = io.BytesIO()  # in-memory file for saving
+            export(data, xlsx)  # writes on xlsx
+
+            xlsx.seek(0)  # returns buffer to 0
+
+            # Sends the processed file as response
+            return send_file(
+                xlsx, 
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                as_attachment=True,
+                attachment_filename='workbook.xlsx'
+            )
 
     return '''
     <!doctype html>
@@ -49,22 +63,27 @@ def upload_file():
 
         <div>
             <input type="radio" id="agr"
-                   name="doc_type" value="agr" checked />
+                   name="doc_type" value="AG" checked />
             <label for="agr">Agricultural</label>
         </div>
 
         <div>
             <input type="radio" id="com"
-                   name="doc_type" value="com" />
+                   name="doc_type" value="CO" />
             <label for="com">Commercial</label>
         </div>
 
         <div>
             <input type="radio" id="res"
-                   name="doc_type" value="res" />
+                   name="doc_type" value="RE" />
             <label for="res">Residential</label>
         </div>
 
     </fieldset>
       <input type=submit value=Upload>
     </form>
+    '''
+
+# We only need this for local development.
+if __name__ == '__main__':
+    app.run()
