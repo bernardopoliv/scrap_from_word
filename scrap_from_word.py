@@ -3,9 +3,7 @@ import os
 import docx
 import openpyxl
 
-
 fields_and_values = {}
-
 
 def lookup(doc, fields_and_values, paragraph_index: int, runs_index: int, variable_name: str):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
@@ -21,7 +19,9 @@ def look_value(doc, paragraph_index: int, runs_index: int):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
     return value
 
+
 def export(fields_and_values, output_file = None):
+
     output_wb = openpyxl.Workbook()
     output_sheet = output_wb.active
 
@@ -36,18 +36,20 @@ def export(fields_and_values, output_file = None):
     else:
         output_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx')
 
+
 def scan():
-    i=0
+    i = 0
     for p in doc.paragraphs:
-         print(i, p.text)
-         i+=1
+        print(i, p.text)
+        i += 1
 
 def find_value(paragraph_index: int):
-    for p in range (0,100):
+    for p in range(0, 100):
         try:
             print(str(p) + doc.paragraphs[paragraph_index].runs[p].text)
         except:
             pass
+
 
 def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or 'RE'
     fields_and_values = {}
@@ -204,7 +206,7 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         lookup(doc, fields_and_values, 0, 0, 'AG_LAND_CHEMICAL_PRESENT')
 
         # PAGE 4
-        AG_ADDRESS_NAME = look_value(86, 6)[:-1]
+        AG_ADDRESS_NAME = look_value(doc, 86, 6)
         AG_ADDRESS_NAME = AG_ADDRESS_NAME[:-1]
         fields_and_values.update({'AG_ADDRESS_NAME': AG_ADDRESS_NAME})
         lookup(doc, fields_and_values, 87, 7, 'AG_ADDRESS_STREET')
@@ -226,7 +228,4 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         lookup(doc, fields_and_values, 181, 0, 'AG_SIGNED_COUNCILLOR2_NAME')
 
         return fields_and_values
-
-
-
 
