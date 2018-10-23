@@ -4,10 +4,12 @@ import docx
 import openpyxl
 
 fields_and_values = {}
+output_filepath = 'C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx'
 
 def lookup(doc, fields_and_values, paragraph_index: int, runs_index: int, variable_name: str):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
     fields_and_values.update({variable_name: value})
+
     return value
 
 def get_allparagraph(doc, fields_and_values, paragraph_index: int, variable_name: str):
@@ -19,22 +21,21 @@ def look_value(doc, paragraph_index: int, runs_index: int):
     value = doc.paragraphs[paragraph_index].runs[runs_index].text
     return value
 
-
 def export(fields_and_values, output_file = None):
 
     output_wb = openpyxl.Workbook()
     output_sheet = output_wb.active
 
-    column = 1
+    row = 1
     for key, value in fields_and_values.items():
-        output_sheet.cell(row=1, column=column).value = key
-        output_sheet.cell(row=2, column=column).value = value
-        column += 1
+        output_sheet.cell(row=row, column=1).value = key
+        output_sheet.cell(row=row, column=2).value = value
+        row += 1
 
     if output_file:
         output_wb.save(output_file)
     else:
-        output_wb.save('C:\\Users\BERNARDO\Anaconda3\envs\SCRAP_FROM_WORD\\Output.xlsx')
+        output_wb.save(output_filepath)
 
 
 def scan():
@@ -107,6 +108,8 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         lookup(doc, fields_and_values, 257, 5, 'COUNCILLOR2_LAND_COMM_LEASE')
         lookup(doc, fields_and_values, 260, 6, 'WITNESS1_LAND_COMM_LEASE')
 
+        print(len(fields_and_values.keys()))
+        export (fields_and_values)
         return fields_and_values
 
     elif document_type == 'RE':
@@ -137,7 +140,7 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
 
         # PAGE 18 TODO: check better this part with client
         lookup(doc, fields_and_values, 219,2, 'RESIDENTIAL_LEASE_TENANT_NAME_NOTICE')
-        lookup(doc, fields_and_values, 1, 1, 'RESIDENTIAL_LEASE_TENANT_NAME-NOTICE_DELIVERY: MAIL / EMAIL ')
+        lookup(doc, fields_and_values, 1, 1, 'RESIDENTIAL_LEASE_TENANT_NAME-NOTICE_DELIVERY: MAIL / EMAIL')
         lookup(doc, fields_and_values, 15, 3, 'RESIDENTIAL_LEASE_TENANT_NAME_MAILING_ADDRESS')
         lookup(doc, fields_and_values, 15, 3, 'RESIDENTIAL_LEASE_TENANT_NAME_EMAIL')
 
@@ -150,8 +153,12 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         # PAGE 20 TODO: check better this part with client
         lookup(doc, fields_and_values, 216,2, 'TENANT_NAME')
         lookup(doc, fields_and_values, 1, 1, 'AFFIDAVIT_WITNESS_RESIDENTIAL_LEASE_DATE')
-        lookup(doc, fields_and_values, 15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_SIGNED: YES/NO')
-        lookup(doc, fields_and_values, 15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_NOTARY_SIGNED: YES/NO')
+        lookup(doc, fields_and_values, 15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_SIGNED')
+        lookup(doc, fields_and_values, 15, 3, 'AFFADAVIT_WITNESS_RESIDENTIAL_LEASE_NOTARY_SIGNED')
+
+        print(len(fields_and_values.keys()))
+        export (fields_and_values)
+
         return fields_and_values
 
     elif document_type == 'AG':
@@ -159,51 +166,52 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         #AGRICUTURAL TEMPLATE
         fields_and_values = {}
 
-        doc = docx.Document('Agricultural Crop Share Permit Template FL22.docx')
-
         AG_PERMIT_TYPE = doc.paragraphs[1].text
         AG_PERMIT_TYPE = AG_PERMIT_TYPE[1:]
         fields_and_values.update({'AG_PERMIT_TYPE': AG_PERMIT_TYPE})
 
-        AG_PERM_PRELIM_START_DATE = doc.paragraphs[4].text
-        AG_PERM_PRELIM_START_DATE = AG_PERM_PRELIM_START_DATE[35:]
-        AG_PERM_PRELIM_START_DATE = AG_PERM_PRELIM_START_DATE.split()
+        AG_PERM_PRELIM_START_DATE = str(lookup(doc, fields_and_values, 4, 3, 'AG_PERM_PRELIM_START_DATE') + lookup(doc,fields_and_values,4, 5, 'AG_PERM_PRELIM_START_DATE'))
+        AG_PERM_PRELIM_START_DATE = AG_PERM_PRELIM_START_DATE.replace(' day of', ',')
+        fields_and_values['AG_PERM_PRELIM_START_DATE'] = AG_PERM_PRELIM_START_DATE
 
-        day = AG_PERM_PRELIM_START_DATE[0][:2]
-        month_len = len(AG_PERM_PRELIM_START_DATE[3])
-        month = AG_PERM_PRELIM_START_DATE[3][:month_len - 1]
-        year = AG_PERM_PRELIM_START_DATE[4][:4]
-
-        AG_PERM_PRELIM_START_DATE = day + ', ' + month + ', ' + year
-        fields_and_values.update({'AG_PERM_PRELIM_START_DATE': AG_PERM_PRELIM_START_DATE})
 
         lookup(doc, fields_and_values, 7, 2, "AG_PERM_GRANTOR")
         lookup(doc, fields_and_values, 9, 3, "AG_PERMIT_GRANTEE")
         lookup(doc, fields_and_values, 20, 1, "AG_LOCATION")
         lookup(doc, fields_and_values, 20, 5, "AG_AREA_HECATARES")
-        lookup(doc, fields_and_values, 20, 8, "AG_AREA_ACRES")
+        AG_AREA_ACRES = str(lookup(doc, fields_and_values, 20, 8, "AG_AREA_ACRES"))
+        fields_and_values['AG_AREA_ACRES'] = AG_AREA_ACRES[:-1]
+
         lookup(doc, fields_and_values, 20, 11, "AG_LAND_USE")
 
         # PAGE 2
-        AG_PERMIT_START_DATE = doc.paragraphs[23].runs[8].text + doc.paragraphs[23].runs[10].text
-        fields_and_values.update({'AG_PERMIT_START_DATE': AG_PERMIT_START_DATE})
-        AG_PERMIT_END_DATE = doc.paragraphs[23].runs[15].text + doc.paragraphs[23].runs[17].text
-        fields_and_values.update({'AG_PERMIT_END_DATE': AG_PERMIT_END_DATE})
-        AG_PERMIT_COMMENT = doc.paragraphs[31].runs[4].text + doc.paragraphs[31].runs[5].text + \
-                            doc.paragraphs[31].runs[6].text
+        AG_PERMIT_START_DATE = str(lookup(doc, fields_and_values, 23, 8, 'AG_PERMIT_START_DATE') + lookup(doc, fields_and_values, 23, 10, 'AG_PERMIT_START_DATE'))
+        fields_and_values['AG_PERMIT_START_DATE'] = AG_PERMIT_START_DATE
+
+        AG_PERMIT_END_DATE = str(lookup(doc, fields_and_values, 23, 15, 'AG_PERMIT_END_DATE') + lookup(doc, fields_and_values, 23, 17, 'AG_PERMIT_END_DATE'))
+        fields_and_values['AG_PERMIT_END_DATE'] = AG_PERMIT_END_DATE
+
+        AG_PERMIT_COMMENT = str(lookup(doc, fields_and_values, 31, 4, 'AG_PERMIT_COMMENT') + lookup(doc, fields_and_values, 31, 5, 'AG_PERMIT_COMMENT') + lookup(doc, fields_and_values, 31, 6, 'AG_PERMIT_COMMENT') )
         fields_and_values.update({'AG_PERMIT_COMMENT': AG_PERMIT_COMMENT})
 
         # PAGE 3
-
         lookup(doc, fields_and_values, 0, 0, 'AG_LAND_CHEMICAL_PRESENT')
         lookup(doc, fields_and_values, 0, 0, 'AG_LAND_CHEMICAL_TYPE')
 
         AG_ENVIRONMENTAL_ISSUE = doc.paragraphs[64].text
-        AG_ENVIRONMENTAL_ISSUE = AG_ENVIRONMENTAL_ISSUE[4:]  # DEFAULT TO NO
-        fields_and_values.update({'AG_ENVIRONMENTAL_ISSUE': AG_ENVIRONMENTAL_ISSUE})
+        AG_ENVIRONMENTAL_ISSUE = AG_ENVIRONMENTAL_ISSUE[4:]
+        fields_and_values.update({'AG_ENVIRONMENTAL_ISSUE': AG_ENVIRONMENTAL_ISSUE}) #TODO: QUESTION
 
-        lookup(doc, fields_and_values, 0, 0, 'AG_ENVIRONMENTAL_ISSUE_TYPE')  # DEFAULT TO N/A
+        lookup(doc, fields_and_values, 0, 0, 'AG_ENVIRONMENTAL_ISSUE_TYPE')
         lookup(doc, fields_and_values, 0, 0, 'AG_LAND_CHEMICAL_PRESENT')
+
+        AG_CULTURAL_SIG_FOUND = get_allparagraph(doc, fields_and_values, 68,  'AG_CULTURAL_SIG_FOUND')
+        AG_CULTURAL_SIG_FOUND = AG_CULTURAL_SIG_FOUND[4:]
+        fields_and_values.update({'AG_CULTURAL_SIG_FOUND': AG_CULTURAL_SIG_FOUND})
+
+        AG_CULTURAL_SIG_FOUND_TYPE = get_allparagraph(doc, fields_and_values, 68,  'AG_CULTURAL_SIG_FOUND_TYPE')
+        AG_CULTURAL_SIG_FOUND_TYPE = AG_CULTURAL_SIG_FOUND_TYPE[4:]
+        fields_and_values.update({'AG_CULTURAL_SIG_FOUND_TYPE': AG_CULTURAL_SIG_FOUND_TYPE})
 
         # PAGE 4
         AG_ADDRESS_NAME = look_value(doc, 86, 6)
@@ -227,5 +235,12 @@ def get_values(document_type: str, doc: docx.Document):       #'AG' or 'CO' or '
         lookup(doc, fields_and_values, 181, 0, 'AG_SIGNED_COUNCILLOR2_NAME')
         lookup(doc, fields_and_values, 181, 0, 'AG_SIGNED_COUNCILLOR2_NAME')
 
+        print(len(fields_and_values.keys()))
+
+        export(fields_and_values)
+
         return fields_and_values
+
+
+
 
