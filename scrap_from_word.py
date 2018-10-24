@@ -57,25 +57,84 @@ def find_value(paragraph_index: int):
             pass
 
 
-def replace_values(replace_file: str):
-    replace_wb = openpyxl.load_workbook(replace_file)
+def replace_values(fields_and_values, replace_filename: str, doc):
+    replace_wb = openpyxl.load_workbook(replace_filename)
     replace_sheet = replace_wb['Sheet']
 
-    filled_field = 1
+    filled_field = 0
+
     for row in range(1,200):
         if replace_sheet.cell(row=row, column=2).value != None:
             filled_field += 1
 
-    row = 1
     for row in range(1,filled_field):
         new_value = str(replace_sheet.cell(row=row, column=3).value)
         replace_sheet.cell(row=row, column=2).value = new_value
         replace_sheet.cell(row=row, column=3).value = None
-        row += 1
 
-    replace_wb.save('output_file.xlsx')
+    for row in range(1,filled_field):
+        fields_and_values.update({replace_sheet.cell(row=row, column=1).value: replace_sheet.cell(row=row, column=2).value})
+
+    return fields_and_values
+
+def generate_new_doc(document_type: str, doc, fields_and_values):
+
+    if document_type == 'CO':
+
+        # COMMERCIAL TEMPLATE
+        # PAGE 1
+        doc.paragraphs[0].runs[0].text = fields_and_values['PERMIT_TYPE']
+        doc.paragraphs[2].text = fields_and_values['AGREEMENT_DATE']
+        doc.paragraphs[6].runs[3].text = fields_and_values['LANDLORD']
+        doc.paragraphs[16].runs[3].text = fields_and_values['TENANT_NAME']
+        doc.paragraphs[28].runs[3].text = fields_and_values['LOT_NUMBER']
+        doc.paragraphs[28].runs[8].text = fields_and_values['PLANNO']
 
 
+        # PAGE 3
+        doc.paragraphs[57].runs[1].text = fields_and_values['TENANT_LEASE_TERM']
+        doc.paragraphs[57].runs[4].text = fields_and_values['INITIAL_DATE']
+        doc.paragraphs[57].runs[7].text = fields_and_values['EXPIRY_DATE']
+        doc.paragraphs[59].runs[1].text = fields_and_values['TENANT_PREMISE_PURPOSE']
+
+        # PAGE 4
+        doc.paragraphs[65].runs[2].text = fields_and_values['RENT_EXPIRE_DATE']
+        doc.paragraphs[65].runs[6].text = fields_and_values['YEARLY_RENT_AMOUNT']
+
+        doc.paragraphs[65].runs[9].text = fields_and_values['YEARLY_RENT_PAY']
+
+        doc.paragraphs[65].runs[12].text = fields_and_values['MONTH_4_PAYMENT_AGREEMENT']
+        doc.paragraphs[65].runs[15].text = fields_and_values['TENANT_FISCAL_START_DATE']
+        doc.paragraphs[65].runs[18].text = fields_and_values['TENANT_FISCAL_END_DATE']
+        doc.paragraphs[65].runs[21].text = fields_and_values['TENANT_CONFIRMED_PAYMENT_DATE']
+
+
+        # PAGE 7
+        # fields_and_values['TENANT_CONIFIRM_PAY_WATER'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_GAS'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_TELEPHONE'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_LIGHT'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_POWER'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_HEAT'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_AIRCONDITIONING'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_SEWER'] = 'YES'
+        # fields_and_values['TENANT_CONIFIRM_PAY_GARBAGE'] = 'YES'
+
+
+        # PAGE 10
+        doc.paragraphs[134].runs[1].text = fields_and_values['TENANT_LIABILITY_INSURANCE_AMOUNT']
+
+        # PAGE 19
+        doc.paragraphs[233].runs[2].text = fields_and_values['TENANT_NAME_NOTICE']
+
+        # PAGE 20
+        doc.paragraphs[253].runs[5].text = fields_and_values['CHIEF_LAND_COMM_LEASE']
+        doc.paragraphs[255].runs[5].text = fields_and_values['COUNCILLOR1_LAND_COMM_LEASE']
+        doc.paragraphs[257].runs[5].text = fields_and_values['COUNCILLOR2_LAND_COMM_LEASE']
+        # doc.paragraphs[260].runs[6].text = fields_and_values['WITNESS1_LAND_COMM_LEASE']
+
+
+        doc.save('test.docx')
 
 def get_values(document_type: str, doc: docx.Document):  # 'AG' or 'CO' or 'RE'
     fields_and_values = {}
