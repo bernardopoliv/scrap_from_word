@@ -57,16 +57,14 @@ def find_value(paragraph_index: int):
             pass
 
 
-def replace_values(outputfile=None):
-    replace_wb = openpyxl.load_workbook('Output.xlsx')
+def replace_values(replace_file: str):
+    replace_wb = openpyxl.load_workbook(replace_file)
     replace_sheet = replace_wb['Sheet']
 
     filled_field = 1
     for row in range(1,200):
         if replace_sheet.cell(row=row, column=2).value != None:
             filled_field += 1
-
-    print(filled_field)
 
     row = 1
     for row in range(1,filled_field):
@@ -277,5 +275,7 @@ def get_values(document_type: str, doc: docx.Document):  # 'AG' or 'CO' or 'RE'
         export(fields_and_values)
 
         return fields_and_values
+
+
 
 
